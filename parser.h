@@ -16,7 +16,6 @@ enum class State:uint32_t {
     Letter,
     Escape,
     Symbol,
-    Error,
 };
 
 enum class Character:uint32_t {
@@ -35,6 +34,7 @@ enum class Action:uint32_t {
     PushStream,
     PushStreamAndThis,
     PushThis,
+    ErrorHandle,
 };
 //fsm end
 
@@ -55,7 +55,7 @@ enum class TokenClass:uint32_t {
 class Parser {
 public:
     int tokenize(const std::string &iString);
-    int tokenize(const std::ifstream &iFile);
+    int tokenize(std::ifstream &iFile);
     void printTokens();
 private:
     std::string _curToken = "";
@@ -77,21 +77,21 @@ private:
         {PAIR(State::Number, Character::Operator), PAIR(State::Init, Action::PushStreamAndThis)},
         {PAIR(State::Number, Character::Bracket), PAIR(State::Init, Action::PushStreamAndThis)},
 
-        {PAIR(State::Letter, Character::Digit), PAIR(State::Error, Error::DigitAfterLetter)},
+        {PAIR(State::Letter, Character::Digit), PAIR(Error::DigitAfterLetter, Action::ErrorHandle)},
         {PAIR(State::Letter, Character::Letter), PAIR(State::Letter, Action::PushThis)},
         {PAIR(State::Letter, Character::EscapeChar), PAIR(State::Escape, Action::PushThis)},
         {PAIR(State::Letter, Character::WhiteSpace), PAIR(State::Init, Action::DoNothing)},
         {PAIR(State::Letter, Character::Operator), PAIR(State::Init, Action::PushThis)},
         {PAIR(State::Letter, Character::Bracket), PAIR(State::Init, Action::PushThis)},
 
-        {PAIR(State::Escape, Character::Digit), PAIR(State::Error, Error::IllegalCharAfterEscape)},
+        {PAIR(State::Escape, Character::Digit), PAIR(Error::IllegalCharAfterEscape, Action::ErrorHandle)},
         {PAIR(State::Escape, Character::Letter), PAIR(State::Symbol, Action::DoNothing)},
-        {PAIR(State::Escape, Character::EscapeChar), PAIR(State::Error, Error::IllegalCharAfterEscape)},
-        {PAIR(State::Escape, Character::WhiteSpace), PAIR(State::Error, Error::IllegalCharAfterEscape)},
-        {PAIR(State::Escape, Character::Operator), PAIR(State::Error, Error::IllegalCharAfterEscape)},
-        {PAIR(State::Escape, Character::Bracket), PAIR(State::Error, Error::IllegalCharAfterEscape)},
+        {PAIR(State::Escape, Character::EscapeChar), PAIR(Error::IllegalCharAfterEscape, Action::ErrorHandle)},
+        {PAIR(State::Escape, Character::WhiteSpace), PAIR(Error::IllegalCharAfterEscape, Action::ErrorHandle)},
+        {PAIR(State::Escape, Character::Operator), PAIR(Error::IllegalCharAfterEscape, Action::ErrorHandle)},
+        {PAIR(State::Escape, Character::Bracket), PAIR(Error::IllegalCharAfterEscape, Action::ErrorHandle)},
 
-        {PAIR(State::Symbol, Character::Digit), PAIR(State::Error, Error::DigitAfterLetter)},
+        {PAIR(State::Symbol, Character::Digit), PAIR(Error::DigitAfterLetter, Action::ErrorHandle)},
         {PAIR(State::Symbol, Character::Letter), PAIR(State::Symbol, Action::DoNothing)},
         {PAIR(State::Symbol, Character::EscapeChar), PAIR(State::Escape, Action::PushStreamAndThis)},
         {PAIR(State::Symbol, Character::WhiteSpace), PAIR(State::Init, Action::PushStream)},

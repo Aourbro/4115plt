@@ -5,7 +5,7 @@
 int Parser::tokenize(const std::string &iString)
 {
     int len = iString.size();
-    if (iString.size() == 0) {
+    if (len == 0) {
         return Error::EmptyString;
     }
 
@@ -37,11 +37,19 @@ int Parser::tokenize(const std::string &iString)
             _tokenStream.push_back(std::make_pair(tokenizeChar(iString[i]), _curToken));
             _curToken.clear();
             break;
+        case Action::ErrorHandle:
+            printf("Error: %d\n", int(nxtState));
+            [[fallthrough]];
         default:
             assert("Error: this branch is unavailable" && false);
             break;
         }
         curState = nxtState;
+    }
+
+    // in case there is no whitespace at the end of the string
+    if (curState == State::Number || curState == State::Symbol) {
+        pushStream(curState);
     }
 
     if (!_badSymbol.empty()) {
@@ -51,8 +59,62 @@ int Parser::tokenize(const std::string &iString)
     return 0;
 }
 
-int Parser::tokenize(const std::ifstream &iFile)
+int Parser::tokenize(std::ifstream &iFile)
 {
+    assert("Error: file not open" && iFile.is_open());
+
+    char c;
+    State curState = State::Init;
+
+    while (!iFile.eof()) {
+        iFile.get(c);
+        if (iFile.fail()) {
+            break;
+        }
+        Character ch = classifyChar(c);
+        if (ch == Character::IllegalChar) {
+            return Error::BadSymbol;
+        }
+        auto it =  _stateTrans.find(PAIR(curState, ch));
+        assert("Error: no state transform info" && it != _stateTrans.end());
+        State nxtState = State(PFIRST(it->second));
+        Action action = Action(PSECOND(it->second));
+        switch (action) {
+        case Action::DoNothing:
+            if (ch != Character::WhiteSpace) {
+                _curToken.push_back(c);
+            }
+            break;
+        case Action::PushStream:
+            pushStream(curState);
+            break;
+        case Action::PushStreamAndThis:
+            pushStream(curState);
+            [[fallthrough]];
+        case Action::PushThis:
+            _curToken.push_back(c);
+            _tokenStream.push_back(std::make_pair(tokenizeChar(c), _curToken));
+            _curToken.clear();
+            break;
+        case Action::ErrorHandle:
+            printf("Error: %d\n", int(nxtState));
+            [[fallthrough]];
+        default:
+            assert("Error: this branch is unavailable" && false);
+            break;
+        }
+        curState = nxtState;
+    }
+
+    // in case there is no whitespace at the end of the string
+    if (curState == State::Number || curState == State::Symbol) {
+        pushStream(curState);
+    }
+
+    if (!_badSymbol.empty()) {
+        return Error::BadSymbol;
+    }
+
     return 0;
 }
 
