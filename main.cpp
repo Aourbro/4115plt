@@ -42,8 +42,10 @@ int main(int argc, char **argv)
 	} else {
 		goto HELP;
 	}
-
-	printf("ret = %d\n", ret);
+	if (ret != Error::Success) {
+		printf("Error: %s\n", dumpError(Error(ret)).c_str());
+	}
+	
 	parser.printTokens();
 	return 0;
 
@@ -57,4 +59,3 @@ HELP:
 				 "Option -f has higher priority than -s\n";
 	return 0;
 }
-

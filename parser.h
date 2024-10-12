@@ -18,7 +18,7 @@ enum class State:uint32_t {
     Symbol,
 };
 
-enum class Character:uint32_t {
+enum class CharacterType:uint32_t {
     Digit,
     Letter,
     EscapeChar,
@@ -31,8 +31,9 @@ enum class Character:uint32_t {
 
 enum class Action:uint32_t {
     DoNothing,
-    PushStream,
-    PushStreamAndThis,
+    AddToken,
+    PushToken,
+    PushTokenAndThis,
     PushThis,
     ErrorHandle,
 };
@@ -58,45 +59,46 @@ public:
     int tokenize(std::ifstream &iFile);
     void printTokens();
 private:
-    std::string _curToken = "";
+    uint32_t _pos {0};
+    std::string _curToken {""};
 #define PAIR(x, y) (uint32_t(x) << 16 | uint32_t(y))
 #define PFIRST(x) ((uint32_t(x) >> 16) & 0x0000ffff)
 #define PSECOND(x) (uint32_t(x) & 0x0000ffff)
     const std::unordered_map<uint32_t, uint32_t> _stateTrans {
-        {PAIR(State::Init, Character::Digit), PAIR(State::Number, Action::DoNothing)},
-        {PAIR(State::Init, Character::Letter), PAIR(State::Letter, Action::PushThis)},
-        {PAIR(State::Init, Character::EscapeChar), PAIR(State::Escape, Action::PushThis)},
-        {PAIR(State::Init, Character::WhiteSpace), PAIR(State::Init, Action::DoNothing)},
-        {PAIR(State::Init, Character::Operator), PAIR(State::Init, Action::PushThis)},
-        {PAIR(State::Init, Character::Bracket), PAIR(State::Init, Action::PushThis)},
+        {PAIR(State::Init, CharacterType::Digit), PAIR(State::Number, Action::AddToken)},
+        {PAIR(State::Init, CharacterType::Letter), PAIR(State::Letter, Action::PushThis)},
+        {PAIR(State::Init, CharacterType::EscapeChar), PAIR(State::Escape, Action::PushThis)},
+        {PAIR(State::Init, CharacterType::WhiteSpace), PAIR(State::Init, Action::DoNothing)},
+        {PAIR(State::Init, CharacterType::Operator), PAIR(State::Init, Action::PushThis)},
+        {PAIR(State::Init, CharacterType::Bracket), PAIR(State::Init, Action::PushThis)},
 
-        {PAIR(State::Number, Character::Digit), PAIR(State::Number, Action::DoNothing)},
-        {PAIR(State::Number, Character::Letter), PAIR(State::Letter, Action::PushStream)},
-        {PAIR(State::Number, Character::EscapeChar), PAIR(State::Escape, Action::PushStreamAndThis)},
-        {PAIR(State::Number, Character::WhiteSpace), PAIR(State::Init, Action::PushStream)},
-        {PAIR(State::Number, Character::Operator), PAIR(State::Init, Action::PushStreamAndThis)},
-        {PAIR(State::Number, Character::Bracket), PAIR(State::Init, Action::PushStreamAndThis)},
+        {PAIR(State::Number, CharacterType::Digit), PAIR(State::Number, Action::AddToken)},
+        {PAIR(State::Number, CharacterType::Letter), PAIR(State::Letter, Action::PushToken)},
+        {PAIR(State::Number, CharacterType::EscapeChar), PAIR(State::Escape, Action::PushTokenAndThis)},
+        {PAIR(State::Number, CharacterType::WhiteSpace), PAIR(State::Init, Action::PushToken)},
+        {PAIR(State::Number, CharacterType::Operator), PAIR(State::Init, Action::PushTokenAndThis)},
+        {PAIR(State::Number, CharacterType::Bracket), PAIR(State::Init, Action::PushTokenAndThis)},
 
-        {PAIR(State::Letter, Character::Digit), PAIR(Error::DigitAfterLetter, Action::ErrorHandle)},
-        {PAIR(State::Letter, Character::Letter), PAIR(State::Letter, Action::PushThis)},
-        {PAIR(State::Letter, Character::EscapeChar), PAIR(State::Escape, Action::PushThis)},
-        {PAIR(State::Letter, Character::WhiteSpace), PAIR(State::Init, Action::DoNothing)},
-        {PAIR(State::Letter, Character::Operator), PAIR(State::Init, Action::PushThis)},
-        {PAIR(State::Letter, Character::Bracket), PAIR(State::Init, Action::PushThis)},
+        {PAIR(State::Letter, CharacterType::Digit), PAIR(Error::DigitAfterLetter, Action::ErrorHandle)},
+        {PAIR(State::Letter, CharacterType::Letter), PAIR(State::Letter, Action::PushThis)},
+        {PAIR(State::Letter, CharacterType::EscapeChar), PAIR(State::Escape, Action::PushThis)},
+        {PAIR(State::Letter, CharacterType::WhiteSpace), PAIR(State::Init, Action::DoNothing)},
+        {PAIR(State::Letter, CharacterType::Operator), PAIR(State::Init, Action::PushThis)},
+        {PAIR(State::Letter, CharacterType::Bracket), PAIR(State::Init, Action::PushThis)},
 
-        {PAIR(State::Escape, Character::Digit), PAIR(Error::IllegalCharAfterEscape, Action::ErrorHandle)},
-        {PAIR(State::Escape, Character::Letter), PAIR(State::Symbol, Action::DoNothing)},
-        {PAIR(State::Escape, Character::EscapeChar), PAIR(Error::IllegalCharAfterEscape, Action::ErrorHandle)},
-        {PAIR(State::Escape, Character::WhiteSpace), PAIR(Error::IllegalCharAfterEscape, Action::ErrorHandle)},
-        {PAIR(State::Escape, Character::Operator), PAIR(Error::IllegalCharAfterEscape, Action::ErrorHandle)},
-        {PAIR(State::Escape, Character::Bracket), PAIR(Error::IllegalCharAfterEscape, Action::ErrorHandle)},
+        {PAIR(State::Escape, CharacterType::Digit), PAIR(Error::IllegalCharAfterEscape, Action::ErrorHandle)},
+        {PAIR(State::Escape, CharacterType::Letter), PAIR(State::Symbol, Action::AddToken)},
+        {PAIR(State::Escape, CharacterType::EscapeChar), PAIR(Error::IllegalCharAfterEscape, Action::ErrorHandle)},
+        {PAIR(State::Escape, CharacterType::WhiteSpace), PAIR(Error::IllegalCharAfterEscape, Action::ErrorHandle)},
+        {PAIR(State::Escape, CharacterType::Operator), PAIR(Error::IllegalCharAfterEscape, Action::ErrorHandle)},
+        {PAIR(State::Escape, CharacterType::Bracket), PAIR(Error::IllegalCharAfterEscape, Action::ErrorHandle)},
 
-        {PAIR(State::Symbol, Character::Digit), PAIR(Error::DigitAfterLetter, Action::ErrorHandle)},
-        {PAIR(State::Symbol, Character::Letter), PAIR(State::Symbol, Action::DoNothing)},
-        {PAIR(State::Symbol, Character::EscapeChar), PAIR(State::Escape, Action::PushStreamAndThis)},
-        {PAIR(State::Symbol, Character::WhiteSpace), PAIR(State::Init, Action::PushStream)},
-        {PAIR(State::Symbol, Character::Operator), PAIR(State::Init, Action::PushStreamAndThis)},
-        {PAIR(State::Symbol, Character::Bracket), PAIR(State::Init, Action::PushStreamAndThis)},
+        {PAIR(State::Symbol, CharacterType::Digit), PAIR(Error::DigitAfterLetter, Action::ErrorHandle)},
+        {PAIR(State::Symbol, CharacterType::Letter), PAIR(State::Symbol, Action::AddToken)},
+        {PAIR(State::Symbol, CharacterType::EscapeChar), PAIR(State::Escape, Action::PushTokenAndThis)},
+        {PAIR(State::Symbol, CharacterType::WhiteSpace), PAIR(State::Init, Action::PushToken)},
+        {PAIR(State::Symbol, CharacterType::Operator), PAIR(State::Init, Action::PushTokenAndThis)},
+        {PAIR(State::Symbol, CharacterType::Bracket), PAIR(State::Init, Action::PushTokenAndThis)},
     };
 
     const std::unordered_set<std::string> _keywordPool {
@@ -109,31 +111,33 @@ private:
     };
 
     std::vector<std::pair<TokenClass, std::string> > _tokenStream {};
-    std::vector<std::string> _badSymbol {};
+    std::vector<std::pair<std::string, uint32_t> > _badSymbol {};
 
-    const Character classifyChar(char c) {
+    const CharacterType classifyChar(char c)
+    {
         if (c >= '0' && c <= '9') {
-            return Character::Digit;
+            return CharacterType::Digit;
         }
         if (c >= 'a' && c <= 'z') {
-            return Character::Letter;
+            return CharacterType::Letter;
         }
         if (c == '\\') {
-            return Character::EscapeChar;
+            return CharacterType::EscapeChar;
         }
         if (c == ' ' || c == '\0' || c == '\t' || c == '\n') {
-            return Character::WhiteSpace;
+            return CharacterType::WhiteSpace;
         }
         if (c == '+' || c == '-' || c == '*' || c == '/' || c == '%') {
-            return Character::Operator;
+            return CharacterType::Operator;
         }
         if (c == '{' || c == '}' || c == '(' || c == ')') {
-            return Character::Bracket;
+            return CharacterType::Bracket;
         }
-        return Character::IllegalChar;
+        return CharacterType::IllegalChar;
     }
 
-    const TokenClass tokenizeChar(char c) {
+    const TokenClass tokenizeChar(char c)
+    {
         if (c >= 'a' && c <= 'z') {
             return TokenClass::Symbol;
         }
@@ -156,7 +160,36 @@ private:
         }
     }
 
-    void pushStream(State curState);
+    State readChar(char c, State curState);
+    inline void pushToken(State curState);
+    inline void pushThis(char c);
+    int postTokenize(State curState);
+
+    inline std::string token2String(TokenClass token)
+    {
+        switch (token){
+        case TokenClass::Symbol:
+            return "Symbol";
+        case TokenClass::Number:
+            return "Number";
+        case TokenClass::Keyword:
+            return "Keyword";
+        case TokenClass::Operator:
+            return "Operator";
+        case TokenClass::EscapeChar:
+            return "Escape Character";
+        case TokenClass::LeftParenthesis:
+            return "Left Parenthesis";
+        case TokenClass::RightParenthesis:
+            return "Right Parenthesis";
+        case TokenClass::LeftBrace:
+            return "Left Brace";
+        case TokenClass::RightBrace:
+            return "Right Brace";
+        default:
+            return "Unkown Token Class";
+        }
+    }
 };
 
 #endif

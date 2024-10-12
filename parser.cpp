@@ -4,59 +4,15 @@
 
 int Parser::tokenize(const std::string &iString)
 {
-    int len = iString.size();
-    if (len == 0) {
-        return Error::EmptyString;
-    }
-
+    uint32_t len = iString.size();
     State curState = State::Init;
 
-    for (int i = 0; i < len; ++i) {
-        Character ch = classifyChar(iString[i]);
-        if (ch == Character::IllegalChar) {
-            return Error::BadSymbol;
-        }
-        auto it =  _stateTrans.find(PAIR(curState, ch));
-        assert("Error: no state transform info" && it != _stateTrans.end());
-        State nxtState = State(PFIRST(it->second));
-        Action action = Action(PSECOND(it->second));
-        switch (action) {
-        case Action::DoNothing:
-            if (ch != Character::WhiteSpace) {
-                _curToken.push_back(iString[i]);
-            }
-            break;
-        case Action::PushStream:
-            pushStream(curState);
-            break;
-        case Action::PushStreamAndThis:
-            pushStream(curState);
-            [[fallthrough]];
-        case Action::PushThis:
-            _curToken.push_back(iString[i]);
-            _tokenStream.push_back(std::make_pair(tokenizeChar(iString[i]), _curToken));
-            _curToken.clear();
-            break;
-        case Action::ErrorHandle:
-            printf("Error: %d\n", int(nxtState));
-            [[fallthrough]];
-        default:
-            assert("Error: this branch is unavailable" && false);
-            break;
-        }
-        curState = nxtState;
+    for (; _pos < len; ++_pos) {
+        char c = iString[_pos];
+        curState = readChar(c, curState);
     }
 
-    // in case there is no whitespace at the end of the string
-    if (curState == State::Number || curState == State::Symbol) {
-        pushStream(curState);
-    }
-
-    if (!_badSymbol.empty()) {
-        return Error::BadSymbol;
-    }
-
-    return 0;
+    return postTokenize(curState);
 }
 
 int Parser::tokenize(std::ifstream &iFile)
@@ -71,54 +27,73 @@ int Parser::tokenize(std::ifstream &iFile)
         if (iFile.fail()) {
             break;
         }
-        Character ch = classifyChar(c);
-        if (ch == Character::IllegalChar) {
-            return Error::BadSymbol;
+        curState = readChar(c, curState);
+        _pos++;
+    }
+
+    return postTokenize(curState);
+}
+
+State Parser::readChar(char c, State curState)
+{
+    CharacterType charType = classifyChar(c);
+    if (charType == CharacterType::IllegalChar) {
+        printf("illegal char at position %d: %c\n", _pos, c);
+        pushToken(curState);
+        return State::Init;
+    }
+    auto it =  _stateTrans.find(PAIR(curState, charType));
+    assert("Error: no state transform info" && it != _stateTrans.end());
+    State nxtState = State(PFIRST(it->second));
+    Action action = Action(PSECOND(it->second));
+    switch (action) {
+    case Action::DoNothing:
+        break;
+    case Action::AddToken:
+        _curToken.push_back(c);
+        break;
+    case Action::PushToken:
+        pushToken(curState);
+        break;
+    case Action::PushTokenAndThis:
+        pushToken(curState);
+        [[fallthrough]];
+    case Action::PushThis:
+        pushThis(c);
+        break;
+    case Action::ErrorHandle:
+        printf("Error: %s at position %d: \'%c\'\n", dumpError(Error(nxtState)).c_str(), _pos, c);
+        return State::Init;
+    default:
+        assert("Error: this branch is unavailable" && false);
+    }
+    return nxtState;
+}
+
+int Parser::postTokenize(State curState)
+{
+    if (_pos == 0) {
+        return Error::EmptyString;
+    }
+
+    if (!_badSymbol.empty()) {
+        printf("Bad Symbols:\n");
+        int len = _badSymbol.size();
+        for (int i = 0; i < len; ++i) {
+            printf("  %s at position %d\n", _badSymbol[i].first.c_str(), _badSymbol[i].second);
         }
-        auto it =  _stateTrans.find(PAIR(curState, ch));
-        assert("Error: no state transform info" && it != _stateTrans.end());
-        State nxtState = State(PFIRST(it->second));
-        Action action = Action(PSECOND(it->second));
-        switch (action) {
-        case Action::DoNothing:
-            if (ch != Character::WhiteSpace) {
-                _curToken.push_back(c);
-            }
-            break;
-        case Action::PushStream:
-            pushStream(curState);
-            break;
-        case Action::PushStreamAndThis:
-            pushStream(curState);
-            [[fallthrough]];
-        case Action::PushThis:
-            _curToken.push_back(c);
-            _tokenStream.push_back(std::make_pair(tokenizeChar(c), _curToken));
-            _curToken.clear();
-            break;
-        case Action::ErrorHandle:
-            printf("Error: %d\n", int(nxtState));
-            [[fallthrough]];
-        default:
-            assert("Error: this branch is unavailable" && false);
-            break;
-        }
-        curState = nxtState;
+        return Error::BadSymbol;
     }
 
     // in case there is no whitespace at the end of the string
     if (curState == State::Number || curState == State::Symbol) {
-        pushStream(curState);
-    }
-
-    if (!_badSymbol.empty()) {
-        return Error::BadSymbol;
+        pushToken(curState);
     }
 
     return 0;
 }
 
-void Parser::pushStream(State curState)
+inline void Parser::pushToken(State curState)
 {
     if (curState == State::Number) {
         _tokenStream.push_back(std::make_pair(TokenClass::Number, _curToken));
@@ -128,11 +103,18 @@ void Parser::pushStream(State curState)
         } else if (_symbolPool.find(_curToken) != _symbolPool.end()) {
             _tokenStream.push_back(std::make_pair(TokenClass::Symbol, _curToken));
         } else {
-            _badSymbol.push_back(_curToken);
+            _badSymbol.push_back(std::make_pair(_curToken, _pos - _curToken.length()));
         }
     } else {
         assert("Error: this branch is unavailable" && false);
     }
+    _curToken.clear();
+}
+
+inline void Parser::pushThis(char c)
+{
+    _curToken.push_back(c);
+    _tokenStream.push_back(std::make_pair(tokenizeChar(c), _curToken));
     _curToken.clear();
 }
 
@@ -142,6 +124,6 @@ void Parser::printTokens()
     printf("total %d tokens:\n", size);
 
     for (int i = 0; i < size; ++i) {
-        printf("\t<%u, %s>\n", uint32_t(_tokenStream[i].first), _tokenStream[i].second.c_str());
+        printf("  <%s, %s>\n", token2String(_tokenStream[i].first).c_str(), _tokenStream[i].second.c_str());
     }
 }
