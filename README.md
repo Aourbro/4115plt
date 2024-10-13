@@ -32,7 +32,15 @@ Option -f has higher priority than -s
 Test cases are available in the `./testcases` directory, named `test{n}.tex`.  
 To run a test: `./main -f ./testcases/test0.tex`
 
-**Sample output**
+### test cases details:
+  -  `./testcases/test0.tex`: a valid one
+  -  `./testcases/test1.tex`: empty string error
+  -  `./testcases/test2.tex`: bad symbols error
+  -  `./testcases/test3.tex`: digit after letter error
+  -  `./testcases/test4.tex`: an illegal escape character sequence (IllegalCharAfterEscape Error)
+  -  `./testcases/test5.tex`: a nested valid one
+
+#### Sample output from test0
 ```
 total 14 tokens:
   <Escape Character, \>
@@ -50,6 +58,7 @@ total 14 tokens:
   <Escape Character, \>
   <Symbol, beta>
 ``` 
+
 
 ## Lexical Grammar
 Symbol := [a-z]|alpha|beta|...|zeta  
