@@ -4,6 +4,10 @@
 
 The first deliverable implements a **lexical analyzer (Tokenizer)** using a **Finite State Machine (FSM)** to process input strings or files. The tokenizer identifies **tokens** such as numbers, symbols, and keywords, handling errors for illegal characters and unrecognized symbols. The primary goal is to parse input systematically by breaking it down into meaningful tokens and reporting any parsing issues.
 
+## Teammates
+Yunhao Xing (yx2812)  
+Ziang Xu (zx2462) 
+
 ## Installation
 
 ### Environment Preparation (Developed on `Ubuntu 24.04`)
@@ -26,11 +30,26 @@ Option -f has higher priority than -s
 
 ## Running Test Cases
 Test cases are available in the `./testcases` directory, named `test{n}.tex`.  
-To run a test: `./main -f ./testcases/test1.tex`
+To run a test: `./main -f ./testcases/test0.tex`
 
-## Teammates
-Yunhao Xing (yx2812)  
-Ziang Xu (zx2462)  
+**Sample output**
+```
+total 14 tokens:
+  <Escape Character, \>
+  <Keyword, frac>
+  <Left Brace, {>
+  <Number, 1>
+  <Right Brace, }>
+  <Left Brace, {>
+  <Number, 10>
+  <Right Brace, }>
+  <Symbol, a>
+  <Escape Character, \>
+  <Symbol, alpha>
+  <Operator, +>
+  <Escape Character, \>
+  <Symbol, beta>
+``` 
 
 ## Lexical Grammar
 Symbol := [a-z]|alpha|beta|...|zeta  
