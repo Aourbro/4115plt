@@ -37,7 +37,7 @@ To run a test: `./main -f ./testcases/test0.tex`
   -  `./testcases/test1.tex`: empty string error
   -  `./testcases/test2.tex`: bad symbols error
   -  `./testcases/test3.tex`: digit after letter error
-  -  `./testcases/test4.tex`: an illegal escape character sequence (IllegalCharAfterEscape Error)
+  -  `./testcases/test4.tex`: another bad symbol error
   -  `./testcases/test5.tex`: a nested valid one
 
 #### Sample output from test0

@@ -76,6 +76,11 @@ int Parser::postTokenize(State curState)
         return Error::EmptyString;
     }
 
+    // in case there is no whitespace at the end of the string
+    if (curState == State::Number || curState == State::Symbol) {
+        pushToken(curState);
+    }
+
     if (!_badSymbol.empty()) {
         printf("Bad Symbols:\n");
         int len = _badSymbol.size();
@@ -83,11 +88,6 @@ int Parser::postTokenize(State curState)
             printf("  %s at position %d\n", _badSymbol[i].first.c_str(), _badSymbol[i].second);
         }
         return Error::BadSymbol;
-    }
-
-    // in case there is no whitespace at the end of the string
-    if (curState == State::Number || curState == State::Symbol) {
-        pushToken(curState);
     }
 
     return 0;
