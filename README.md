@@ -37,8 +37,7 @@ To run a test: `./main -f ./testcases/test0.tex`
   -  `./testcases/test1.tex`: empty string error
   -  `./testcases/test2.tex`: bad symbols error
   -  `./testcases/test3.tex`: digit after letter error
-  -  `./testcases/test4.tex`: another bad symbol error
-  -  `./testcases/test5.tex`: a nested valid one
+  -  `./testcases/test4.tex`: a nested valid one
 
 #### Sample output from test0
 ```
@@ -58,6 +57,62 @@ total 14 tokens:
   <Escape Character, \>
   <Symbol, beta>
 ``` 
+
+#### Sample output from test1
+```
+Error: Empty String
+total 0 tokens:
+```
+
+#### Sample output from test2
+```
+Bad Symbols:
+  bad at position 1
+Error: Bad Symbol
+total 8 tokens:
+  <Escape Character, \>
+  <Operator, +>
+  <Symbol, s>
+  <Symbol, y>
+  <Symbol, m>
+  <Symbol, b>
+  <Symbol, o>
+  <Symbol, l>
+```
+
+#### Sample output from test3
+```
+Error: Digit After Letter at position 12: '2'
+total 6 tokens:
+  <Symbol, a>
+  <Escape Character, \>
+  <Symbol, zeta>
+  <Number, 1>
+  <Operator, +>
+  <Symbol, b>
+```
+
+#### Sample output from test4
+```
+total 17 tokens:
+  <Escape Character, \>
+  <Keyword, frac>
+  <Left Brace, {>
+  <Number, 2>
+  <Operator, +>
+  <Escape Character, \>
+  <Keyword, frac>
+  <Left Brace, {>
+  <Number, 1>
+  <Right Brace, }>
+  <Left Brace, {>
+  <Number, 2>
+  <Right Brace, }>
+  <Right Brace, }>
+  <Left Brace, {>
+  <Number, 3>
+  <Right Brace, }>
+```
 
 
 ## Lexical Grammar
