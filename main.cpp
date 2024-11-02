@@ -1,11 +1,12 @@
 #include <iostream>
-#include "parser.h"
+#include "lexer.h"
 
 int main(int argc, char **argv)
 {
 	int ret = -1;
 
-	Parser parser;
+	Lexer lexer;
+	std::vector<std::pair<TokenClass, std::string> > tokenStream;
 
 	std::string inputString;
 	std::string inputFile;
@@ -36,17 +37,20 @@ int main(int argc, char **argv)
 	
 	if (!inputFile.empty()) {
 		iFile.open(inputFile, std::ios::in);
-		ret = parser.tokenize(iFile);
+		ret = lexer.tokenize(iFile);
 	} else if (!inputString.empty()) {
-		ret = parser.tokenize(inputString);
+		ret = lexer.tokenize(inputString);
 	} else {
 		goto HELP;
 	}
 	if (ret != Error::Success) {
 		printf("Error: %s\n", dumpError(Error(ret)).c_str());
+		goto HELP;
 	}
 	
-	parser.printTokens();
+	// lexer.printTokens();
+	tokenStream = lexer.getStream();
+	tokenStream.push_back(std::make_pair(TokenClass::EOS, "$"));
 	return 0;
 
 HELP:

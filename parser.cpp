@@ -1,129 +1,119 @@
-#include <cassert>
 #include "parser.h"
 #include "error.h"
 
-int Parser::tokenize(const std::string &iString)
+std::unique_ptr<BaseAST> Parser::parse(std::vector<std::pair<TokenClass, std::string> > stream)
 {
-    uint32_t len = iString.size();
-    State curState = State::Init;
-
-    for (; _pos < len; ++_pos) {
-        char c = iString[_pos];
-        curState = readChar(c, curState);
-    }
-
-    return postTokenize(curState);
+    this->_stream = stream;
+    return parseExpr();
 }
 
-int Parser::tokenize(std::ifstream &iFile)
+    // case TokenClass::Symbol:
+    // case TokenClass::Number:
+    // case TokenClass::Keyword:
+    // case TokenClass::Operator:
+    // case TokenClass::EscapeChar:
+    // case TokenClass::LeftParenthesis:
+    // case TokenClass::RightParenthesis:
+    // case TokenClass::LeftBrace:
+    // case TokenClass::RightBrace:
+    // case TokenClass::EOS;
+    // default:
+    //     return "Unkown Token Class";
+
+std::unique_ptr<ExprAST> Parser::parseExpr()
 {
-    assert("Error: file not open" && iFile.is_open());
-
-    char c;
-    State curState = State::Init;
-
-    while (!iFile.eof()) {
-        iFile.get(c);
-        if (iFile.fail()) {
-            break;
-        }
-        curState = readChar(c, curState);
-        _pos++;
-    }
-
-    return postTokenize(curState);
-}
-
-State Parser::readChar(char c, State curState)
-{
-    CharacterType charType = classifyChar(c);
-    if (charType == CharacterType::IllegalChar) {
-        printf("illegal char at position %d: %c\n", _pos, c);
-        pushToken(curState);
-        return State::Init;
-    }
-    auto it =  _stateTrans.find(PAIR(curState, charType));
-    assert("Error: no state transform info" && it != _stateTrans.end());
-    State nxtState = State(PFIRST(it->second));
-    Action action = Action(PSECOND(it->second));
-    switch (action) {
-    case Action::DoNothing:
-        break;
-    case Action::AddToken:
-        _curToken.push_back(c);
-        break;
-    case Action::PushToken:
-        pushToken(curState);
-        break;
-    case Action::PushTokenAndThis:
-        pushToken(curState);
-        [[fallthrough]];
-    case Action::PushThis:
-        pushThis(c);
-        break;
-    case Action::ErrorHandle:
-        printf("Error: %s at position %d: \'%c\'\n", dumpError(Error(nxtState)).c_str(), _pos, c);
-        return State::Init;
+    std::unique_ptr<ExprAST> expr(new ExprAST());
+    switch (_stream[_pos].first) {
+    case TokenClass::Symbol:
+    case TokenClass::Number:
+    case TokenClass::EscapeChar:
+    case TokenClass::LeftParenthesis:
+        expr->term = parseTerm();
+        expr->exprs = parseExprs();
+        return expr;
     default:
-        assert("Error: this branch is unavailable" && false);
+        printf("Unexpected token \"%s\" at token %d", _stream[_pos].second.c_str(), _pos);
+        return nullptr;
     }
-    return nxtState;
 }
 
-int Parser::postTokenize(State curState)
+std::unique_ptr<ExprsAST> Parser::parseExprs()
 {
-    if (_pos == 0) {
-        return Error::EmptyString;
-    }
-
-    // in case there is no whitespace at the end of the string
-    if (curState == State::Number || curState == State::Symbol) {
-        pushToken(curState);
-    }
-
-    if (!_badSymbol.empty()) {
-        printf("Bad Symbols:\n");
-        int len = _badSymbol.size();
-        for (int i = 0; i < len; ++i) {
-            printf("  %s at position %d\n", _badSymbol[i].first.c_str(), _badSymbol[i].second);
-        }
-        return Error::BadSymbol;
-    }
-
-    return 0;
-}
-
-inline void Parser::pushToken(State curState)
-{
-    if (curState == State::Number) {
-        _tokenStream.push_back(std::make_pair(TokenClass::Number, _curToken));
-    } else if (curState == State::Symbol) {
-        if (_keywordPool.find(_curToken) != _keywordPool.end()) {
-            _tokenStream.push_back(std::make_pair(TokenClass::Keyword, _curToken));
-        } else if (_symbolPool.find(_curToken) != _symbolPool.end()) {
-            _tokenStream.push_back(std::make_pair(TokenClass::Symbol, _curToken));
+    std::unique_ptr<ExprsAST> exprs(new ExprsAST());
+    switch (_stream[_pos].first) {
+    case TokenClass::RightParenthesis:
+    case TokenClass::RightBrace:
+    case TokenClass::EOS:
+        exprs->type = -1;
+        return exprs;
+    case TokenClass::Operator:
+        if (_stream[_pos].second == "+") {
+            _pos++;
+            exprs->type = 0;
+            exprs->term = parseTerm();
+            exprs->exprs = parseExprs();
+            return exprs;
+        } else if (_stream[_pos].second == "-") {
+            _pos++;
+            exprs->type = 1;
+            exprs->term = parseTerm();
+            exprs->exprs = parseExprs();
+            return exprs;
         } else {
-            _badSymbol.push_back(std::make_pair(_curToken, _pos - _curToken.length()));
+            [[fallthrough]];
         }
-    } else {
-        assert("Error: this branch is unavailable" && false);
+    default:
+        printf("Unexpected token \"%s\" at token %d", _stream[_pos].second.c_str(), _pos);
+        return nullptr;
     }
-    _curToken.clear();
 }
 
-inline void Parser::pushThis(char c)
+std::unique_ptr<TermAST> Parser::parseTerm()
 {
-    _curToken.push_back(c);
-    _tokenStream.push_back(std::make_pair(tokenizeChar(c), _curToken));
-    _curToken.clear();
+
 }
 
-void Parser::printTokens()
+std::unique_ptr<TermsAST> Parser::parseTerms()
 {
-    int size = _tokenStream.size();
-    printf("total %d tokens:\n", size);
 
-    for (int i = 0; i < size; ++i) {
-        printf("  <%s, %s>\n", token2String(_tokenStream[i].first).c_str(), _tokenStream[i].second.c_str());
-    }
+}
+
+std::unique_ptr<UExprAST> Parser::parseUExpr()
+{
+
+}
+
+std::unique_ptr<FactAST> Parser::parseFact()
+{
+
+}
+
+std::unique_ptr<Fact0AST> Parser::parseFact0()
+{
+
+}
+
+std::unique_ptr<NumAST> Parser::parseNum()
+{
+
+}
+
+std::unique_ptr<SymbsAST> Parser::parseSymbs()
+{
+
+}
+
+std::unique_ptr<SymbAST> Parser::parseSymb()
+{
+
+}
+
+std::unique_ptr<Symb0AST> Parser::parseSymb0()
+{
+
+}
+
+std::unique_ptr<ExprAST> Parser::parseFrac()
+{
+
 }

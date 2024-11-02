@@ -142,7 +142,7 @@ RightBrace := \\}
 
 ### **Core Concepts**
 #### **1. Tokenization Process**
-- The parser reads input **character by character**.
+- The lexer reads input **character by character**.
 - Each character triggers **state transitions** based on its type (e.g., number, symbol, keyword).
 - **Actions** are executed based on the new state, including:
   - Adding characters to tokens
