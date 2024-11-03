@@ -55,7 +55,7 @@ private:
     std::unique_ptr<SymbsAST> parseSymbs();
     std::unique_ptr<SymbAST> parseSymb();
     std::unique_ptr<Symb0AST> parseSymb0();
-    std::unique_ptr<ExprAST> parseFrac();
+    std::unique_ptr<FracAST> parseFrac();
 };
 
 #endif

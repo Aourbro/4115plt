@@ -137,7 +137,7 @@ public:
     std::unique_ptr<BaseAST> symbs;
 
     bool readyCalc {false};
-    Rational rat;
+    // Rational rat;
     uint64_t symbols;   // bitmap, 32 bits for english letters and 32 bits for greek letters
 
     void Dump(std::string indent) const override{
