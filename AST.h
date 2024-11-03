@@ -18,7 +18,6 @@ public:
     void Dump(std::string indent) const override{
         std::cout << indent << "xxxAST" << std::endl;
         //TODO
-        std::cout << std::endl;
     }
 };
 
@@ -31,7 +30,6 @@ public:
         std::cout << indent << "ExprAST" << std::endl;
         term->Dump(indent + "  ");
         exprs->Dump(indent + "  ");
-        std::cout << std::endl;
     }
 };
 
@@ -53,7 +51,6 @@ public:
         }
         term->Dump(indent + "  ");
         exprs->Dump(indent + "  ");
-        std::cout << std::endl;
     }
 };
 
@@ -66,7 +63,6 @@ public:
         std::cout << indent << "TermAST" << std::endl;
         uExpr->Dump(indent + "  ");
         terms->Dump(indent + "  ");
-        std::cout << std::endl;
     }
 };
 
@@ -88,7 +84,6 @@ public:
         }
         uExpr->Dump(indent + "  ");
         terms->Dump(indent + "  ");
-        std::cout << std::endl;
     }
 };
 
@@ -105,50 +100,30 @@ public:
             std::cout << indent + "  -" << std::endl;
         }
         fact->Dump(indent + "  ");
-        std::cout << std::endl;
     }
 };
 
+// Fact is an important class, it is the minimal unit for calculation
 class FactAST : public BaseAST{
 public:
-    int type;   // 0=(Epxr) 1=fact0
+    int type;   // 0=(Epxr) 1=num symb0 2=symbs
     std::unique_ptr<BaseAST> expr;
-    std::unique_ptr<BaseAST> fact0;
-
-    void Dump(std::string indent) const override{
-        std::cout << indent << "FactAST" << std::endl;
-        if (type ==0) {
-            std::cout << indent + "  (" << std::endl;
-            expr->Dump(indent + "  ");
-            std::cout << indent + "  )";
-        } else {
-            fact0->Dump(indent + "  ");
-        }
-        std::cout << std::endl;
-    }
-};
-
-// Fact0 is an important class, it is the minimal unit for calculation
-class Fact0AST : public BaseAST{
-public:
-    int type;   // 0=num symb0 1=symbs
     std::unique_ptr<BaseAST> num;
     std::unique_ptr<BaseAST> symb0;
     std::unique_ptr<BaseAST> symbs;
 
-    bool readyCalc {false};
-    // Rational rat;
-    uint64_t symbols;   // bitmap, 32 bits for english letters and 32 bits for greek letters
-
     void Dump(std::string indent) const override{
-        std::cout << indent << "Fact0AST" << std::endl;
-        if (type ==0) {
+        std::cout << indent << "FactAST" << std::endl;
+        if (type == 0) {
+            std::cout << indent + "  (" << std::endl;
+            expr->Dump(indent + "  ");
+            std::cout << indent + "  )";
+        } else if (type == 1) {
             num->Dump(indent + "  ");
             symb0->Dump(indent + "  ");
         } else {
             symbs->Dump(indent + "  ");
         }
-        std::cout << std::endl;
     }
 };
 
@@ -163,37 +138,20 @@ public:
         if (type ==0) {
             frac->Dump(indent + "  ");
         } else {
-            std::cout << indent + "  Number(" << number << ")";
+            std::cout << indent + "  number(" << number << ")" << std::endl;
         }
-        std::cout << std::endl;
     }
 };
 
 class SymbsAST : public BaseAST{
 public:
-    std::unique_ptr<BaseAST> symb;
+    std::string symbol;
     std::unique_ptr<BaseAST> symb0;
 
     void Dump(std::string indent) const override{
         std::cout << indent << "SymbsAST" << std::endl;
-        symb->Dump(indent + "  ");
+        std::cout << indent + "  symbol(" << symbol << ")" << std::endl;
         symb0->Dump(indent + "  ");
-        std::cout << std::endl;
-    }
-};
-
-class SymbAST : public BaseAST{
-public:
-    int type;   // 0=symbol 1=\symbol
-    std::string symbol;
-
-    void Dump(std::string indent) const override{
-        std::cout << indent << "SymbAST" << std::endl;
-        std::cout << indent + "  Symbol(";
-        if (type == 1) {
-            std::cout << indent + "  \\";
-        }
-        std::cout << symbol << ")" << std::endl;
     }
 };
 
@@ -208,7 +166,6 @@ public:
         }
         std::cout << indent << "Symb0AST" << std::endl;
         symbs->Dump(indent + "  ");
-        std::cout << std::endl;
     }
 };
 
@@ -219,8 +176,7 @@ public:
 
     void Dump(std::string indent) const override{
         std::cout << indent << "FracAST" << std::endl;
-        std::cout << indent + "  \\" << std::endl;
-        std::cout << indent + "  frac" << std::endl;
+        std::cout << indent + "  \\frac" << std::endl;
         std::cout << indent + "  {" << std::endl;
         expr_numer->Dump(indent + "  ");
         std::cout << indent + "  }" << std::endl;

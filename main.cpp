@@ -1,12 +1,17 @@
 #include <iostream>
+#include <memory>
 #include "lexer.h"
+#include "parser.h"
 
 int main(int argc, char **argv)
 {
 	int ret = -1;
 
 	Lexer lexer;
+	Parser parser;
+
 	std::vector<std::pair<TokenClass, std::string> > tokenStream;
+	std::unique_ptr<BaseAST> ast;
 
 	std::string inputString;
 	std::string inputFile;
@@ -48,9 +53,14 @@ int main(int argc, char **argv)
 		goto HELP;
 	}
 	
-	// lexer.printTokens();
+	lexer.printTokens();
 	tokenStream = lexer.getStream();
 	tokenStream.push_back(std::make_pair(TokenClass::EOS, "$"));
+
+	ast = parser.parse(tokenStream);
+	if (parser.getSuccess()) {
+		ast->Dump("");
+	}
 	return 0;
 
 HELP:
