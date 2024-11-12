@@ -60,6 +60,8 @@ int main(int argc, char **argv)
 	ast = parser.parse(tokenStream);
 	if (parser.getSuccess()) {
 		ast->Dump("");
+	} else {
+		goto HELP;
 	}
 	return 0;
 

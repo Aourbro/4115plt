@@ -157,3 +157,11 @@ The core logic for state transitions is implemented in `readChar()`.
 - **`PushToken`**: Push the current token to the stream and reset it.
 - **`PushThis`**: Push the current character as a separate token.
 - **`ErrorHandle`**: Handle and report parsing errors.
+
+## How the Parser Works
+
+### The Information About the Parser is Shown as Comments in file "parser.h"
+
+## Programming Assignment 2 Demo Video Link
+
+### https://youtu.be/mGVT5fA_uc0
