@@ -43,7 +43,7 @@ enum class TokenClass:uint32_t {
     Symbol,             // a b ... z alpha beta ... zeta
     Number,
     Keyword,            // 'frac'
-    Operator,           // + - * / %
+    Operator,           // + - * /
     LeftParenthesis,    // (
     RightParenthesis,   // )
     LeftBrace,          // {
@@ -110,7 +110,7 @@ private:
         "\\alpha", "\\beta", "\\gamma", "\\delta", "\\epsilon", "\\zeta", "\\eta", "\\theta", "\\lota", "\\kappa",
         "\\lambda", "\\mu", "\\nu", "\\xi", "\\omicron", "\\pi", "\\rho", "\\sigma", "\\tau", "\\upsilon", "\\phi",
         "\\chi", "\\psi", "\\omega",
-    };
+    };  // 24
 
     std::vector<std::pair<TokenClass, std::string> > _tokenStream {};
     std::vector<std::pair<std::string, uint32_t> > _badSymbol {};
@@ -129,7 +129,7 @@ private:
         if (c == ' ' || c == '\0' || c == '\t' || c == '\n') {
             return CharacterType::WhiteSpace;
         }
-        if (c == '+' || c == '-' || c == '*' || c == '/' || c == '%') {
+        if (c == '+' || c == '-' || c == '*' || c == '/') {
             return CharacterType::Operator;
         }
         if (c == '{' || c == '}' || c == '(' || c == ')') {
@@ -143,7 +143,7 @@ private:
         if (c >= 'a' && c <= 'z') {
             return TokenClass::Symbol;
         }
-        if (c == '+' || c == '-' || c == '*' || c == '/' || c == '%') {
+        if (c == '+' || c == '-' || c == '*' || c == '/') {
             return TokenClass::Operator;
         }
         switch (c) {

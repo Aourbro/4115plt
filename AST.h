@@ -3,22 +3,13 @@
 
 #include <iostream>
 #include <memory>
-#include "rational.h"
+#include "basic_exp.h"
 
 class BaseAST {
 public:
     virtual ~BaseAST() = default;
     virtual void Dump(std::string indent) const = 0;
-};
-
-class TemplateAST : public BaseAST{
-public:
-    //TODO
-
-    void Dump(std::string indent) const override{
-        std::cout << indent << "xxxAST" << std::endl;
-        //TODO
-    }
+    virtual BasicExp calc() const = 0;    // TODO: implement this method on every ast nodes
 };
 
 class ExprAST : public BaseAST{
@@ -30,6 +21,12 @@ public:
         std::cout << indent << "ExprAST" << std::endl;
         term->Dump(indent + "  ");
         exprs->Dump(indent + "  ");
+    }
+
+    BasicExp calc() const override{
+        BasicExp res;
+        //TODO
+        return res;
     }
 };
 
@@ -52,6 +49,12 @@ public:
         term->Dump(indent + "  ");
         exprs->Dump(indent + "  ");
     }
+
+    BasicExp calc() const override{
+        BasicExp res;
+        //TODO
+        return res;
+    }
 };
 
 class TermAST : public BaseAST{
@@ -63,6 +66,12 @@ public:
         std::cout << indent << "TermAST" << std::endl;
         uExpr->Dump(indent + "  ");
         terms->Dump(indent + "  ");
+    }
+
+    BasicExp calc() const override{
+        BasicExp res;
+        //TODO
+        return res;
     }
 };
 
@@ -85,6 +94,12 @@ public:
         uExpr->Dump(indent + "  ");
         terms->Dump(indent + "  ");
     }
+
+    BasicExp calc() const override{
+        BasicExp res;
+        //TODO
+        return res;
+    }
 };
 
 class UExprAST : public BaseAST{
@@ -100,6 +115,12 @@ public:
             std::cout << indent + "  -" << std::endl;
         }
         fact->Dump(indent + "  ");
+    }
+
+    BasicExp calc() const override{
+        BasicExp res;
+        //TODO
+        return res;
     }
 };
 
@@ -125,6 +146,12 @@ public:
             symbs->Dump(indent + "  ");
         }
     }
+
+    BasicExp calc() const override{
+        BasicExp res;
+        //TODO
+        return res;
+    }
 };
 
 class NumAST : public BaseAST{
@@ -141,6 +168,12 @@ public:
             std::cout << indent + "  number(" << number << ")" << std::endl;
         }
     }
+
+    BasicExp calc() const override{
+        BasicExp res;
+        //TODO
+        return res;
+    }
 };
 
 class SymbsAST : public BaseAST{
@@ -152,6 +185,12 @@ public:
         std::cout << indent << "SymbsAST" << std::endl;
         std::cout << indent + "  symbol(" << symbol << ")" << std::endl;
         symb0->Dump(indent + "  ");
+    }
+
+    BasicExp calc() const override{
+        BasicExp res;
+        //TODO
+        return res;
     }
 };
 
@@ -166,6 +205,12 @@ public:
         }
         std::cout << indent << "Symb0AST" << std::endl;
         symbs->Dump(indent + "  ");
+    }
+
+    BasicExp calc() const override{
+        BasicExp res;
+        //TODO
+        return res;
     }
 };
 
@@ -183,6 +228,12 @@ public:
         std::cout << indent + "  {" << std::endl;
         expr_denom->Dump(indent + "  ");
         std::cout << indent + "  }" << std::endl;
+    }
+
+    BasicExp calc() const override{
+        BasicExp res;
+        //TODO
+        return res;
     }
 };
 
