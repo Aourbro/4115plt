@@ -19,7 +19,7 @@ public:
     friend Rational operator/(const Rational& ratA, const Rational& ratB);
 
     void CodeGen() {
-        if (numer < 0) { // 如果分子为负数
+        if (numer < 0) { // if the numerator is negative
             std::cout << "-";
         }
         std::cout << "\\frac{" << std::abs(numer) << "}{" << denom << "}";
@@ -54,7 +54,7 @@ public:
             if (rational.numer < 0) {
                 std::cout << "-";
             }
-            if (std::abs(rational.numer) != 1) {
+            if (std::abs(rational.numer) != 1 || symbolTable == 0) {
                 std::cout << std::abs(rational.numer);
             }
         } else {
