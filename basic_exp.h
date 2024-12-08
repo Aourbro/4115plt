@@ -50,10 +50,12 @@ public:
     void CodeGen() {
         // rational.CodeGen();
         if (rational.denom == 1) {
-            if (rational.numer == -1) {
-                std::cout << "-"; //
-            } else if (rational.numer != 1) {
-                std::cout << rational.numer;
+            if (rational.numer < 0) {
+                // 如果是负数，直接输出负号
+                std::cout << "-";
+            }
+            if (std::abs(rational.numer) != 1) {
+                std::cout << std::abs(rational.numer); // 输出绝对值
             }
         } else {
             rational.CodeGen();
@@ -91,9 +93,6 @@ public:
     void CodeGen() {
         int len = numer.size();
         for (int i = 0; i < len; ++i) {
-            // if (i > 0 && numer[i].rational.numer > 0) {  // insert `+` to the subsequent postive value
-            //     std::cout << "+";
-            // }
             if (i > 0) {
                 if (numer[i].rational.numer > 0) {
                     std::cout << "+";

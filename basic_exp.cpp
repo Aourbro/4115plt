@@ -116,7 +116,7 @@ BasicExp operator-(const BasicExp& expA, const BasicExp& expB)
             }
         }
         if (i == lenA) {
-            res.numer.push_back(expB.numer[j]);
+            res.numer.push_back(-expB.numer[j]);
         }
     }
     return res;
