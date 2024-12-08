@@ -18,7 +18,10 @@ public:
     friend Rational operator/(const Rational& ratA, const Rational& ratB);
 
     void CodeGen() {
-        std::cout << "\\frac{" << numer << "}{" << denom << "}";
+        if (numer < 0) { // 如果分子为负数
+            std::cout << "-";
+        }
+        std::cout << "\\frac{" << std::abs(numer) << "}{" << denom << "}";
     }
 };
 
@@ -45,7 +48,16 @@ public:
     friend BasicTerm operator*(const BasicTerm& termA, const BasicTerm& termB);
 
     void CodeGen() {
-        rational.CodeGen();
+        // rational.CodeGen();
+        if (rational.denom == 1) {
+            if (rational.numer == -1) {
+                std::cout << "-"; //
+            } else if (rational.numer != 1) {
+                std::cout << rational.numer;
+            }
+        } else {
+            rational.CodeGen();
+        }
         for (char c = 'a'; c <= 'z'; ++c) {
             if (symbolTable & (1ULL << (c - 'a'))) {
                 std::cout << c;
@@ -79,6 +91,14 @@ public:
     void CodeGen() {
         int len = numer.size();
         for (int i = 0; i < len; ++i) {
+            // if (i > 0 && numer[i].rational.numer > 0) {  // insert `+` to the subsequent postive value
+            //     std::cout << "+";
+            // }
+            if (i > 0) {
+                if (numer[i].rational.numer > 0) {
+                    std::cout << "+";
+                }
+            }
             numer[i].CodeGen();
         }
     }
