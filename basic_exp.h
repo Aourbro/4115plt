@@ -51,11 +51,10 @@ public:
         // rational.CodeGen();
         if (rational.denom == 1) {
             if (rational.numer < 0) {
-                // 如果是负数，直接输出负号
                 std::cout << "-";
             }
             if (std::abs(rational.numer) != 1) {
-                std::cout << std::abs(rational.numer); // 输出绝对值
+                std::cout << std::abs(rational.numer);
             }
         } else {
             rational.CodeGen();
