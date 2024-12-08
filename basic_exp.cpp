@@ -63,7 +63,6 @@ BasicTerm operator-(const BasicTerm& term)
 BasicTerm operator*(const BasicTerm& termA, const BasicTerm& termB)
 {
     // same symbols are not allowed to multiply, e.g. a*a
-    printf("%lu %lu\n", termA.symbolTable, termB.symbolTable);
     assert("no same symbols allowed in multiply" && (termA.symbolTable & termB.symbolTable) == 0);
 
     return BasicTerm(termA.rational * termB.rational, termA.symbolTable | termB.symbolTable);

@@ -20,17 +20,20 @@ You can run `make clean` to clean up the build files.
 ### Usage
 ```
 Usage: ./main [options]
-Options:
-  --help                 Display this information.
-  -s <string>            Take the <string> as input LaTeX expression.
-  -f <file>              Take content in the <file> as input.
-  -o <file>              Place the output into <file>.
-Option -f has higher priority than -s
+    Options:
+      --help                 Display this information.
+      --debug                Display token and ast information
+      -s <string>            Take the <string> as input LaTeX expression.
+      -f <file>              Take content in the <file> as input.
+      -o <file>              Place the output into <file>.
+    Option -f has higher priority than -s
+    --debug should be put in front of -f.
+    Append '> <file>' after all option to redirect the output into a file;
 ```
 
 ## Running Test Cases
 Test cases are available in the `./testcases` directory, named `test{n}.tex`.  
-To run a test: `./main -f ./testcases/test0.tex`
+To run a test: `./main --debug -f ./testcases/test0.tex` or directly with result `./main -f ./testcases/test0.tex`
 
 ### test cases details:
   -  `./testcases/test0.tex`: a valid one
@@ -287,4 +290,109 @@ ExprAST
                     NumAST
                       number(3)
             }
+```
+
+
+## Programming assignment 3
+
+### Final output of test0
+```
+$ \frac{1}{10}a\alpha+\beta $
+```
+### Final output of test1
+```
+Error: Empty String
+Usage: ./main [options]
+```
+### Final output of test2
+```
+Bad Symbols:
+  \bad at position 0
+Error: Bad Symbol
+```
+### Final output of test3
+```
+Error: Digit After Letter at position 12: '2'
+Unexpected token "1" at token 2
+```
+### Final output of test4
+```
+$ \frac{5}{6} $
+```
+
+### Final output of test5
+`input` : \frac{3}{4}b-\frac{1}{2}b
+```
+% total 17 tokens:
+%  <Keyword, \frac>
+%  <Left Brace, {>
+%  <Number, 3>
+%  <Right Brace, }>
+%  <Left Brace, {>
+%  <Number, 4>
+%  <Right Brace, }>
+%  <Symbol, b>
+%  <Operator, ->
+%  <Keyword, \frac>
+%  <Left Brace, {>
+%  <Number, 1>
+%  <Right Brace, }>
+%  <Left Brace, {>
+%  <Number, 2>
+%  <Right Brace, }>
+%  <Symbol, b>
+% ExprAST
+%   TermAST
+%     UExprAST
+%       FactAST
+%         NumAST
+%           FracAST
+%             \frac
+%             {
+%             ExprAST
+%               TermAST
+%                 UExprAST
+%                   FactAST
+%                     NumAST
+%                       number(3)
+%             }
+%             {
+%             ExprAST
+%               TermAST
+%                 UExprAST
+%                   FactAST
+%                     NumAST
+%                       number(4)
+%             }
+%         Symb0AST
+%           SymbsAST
+%             symbol(b)
+%   ExprsAST
+%     -
+%     TermAST
+%       UExprAST
+%         FactAST
+%           NumAST
+%             FracAST
+%               \frac
+%               {
+%               ExprAST
+%                 TermAST
+%                   UExprAST
+%                     FactAST
+%                       NumAST
+%                         number(1)
+%               }
+%               {
+%               ExprAST
+%                 TermAST
+%                   UExprAST
+%                     FactAST
+%                       NumAST
+%                         number(2)
+%               }
+%           Symb0AST
+%             SymbsAST
+%               symbol(b)
+$ \frac{1}{4}b $
 ```

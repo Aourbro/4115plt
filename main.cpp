@@ -26,6 +26,7 @@ int main(int argc, char **argv)
 		}
 		if (std::string(argv[i]).compare("--debug") == 0) {
 			debug = true;
+			++i;
 		}
 		if (std::string(argv[i]).compare("-s") == 0) {
 			++i;
@@ -83,7 +84,7 @@ HELP:
 	std::cout << "Usage: ./main [options]\n" <<
 		   		 "Options:\n" <<
 				 "  --help                 Display this information.\n" <<
-				 "  --debug				   Display token and ast information\n" <<
+				 "  --debug                Display token and ast information\n" <<
 			 	 "  -s <string>            Take the <string> as input LaTeX expression.\n" <<
 				 "  -f <file>              Take content in the <file> as input.\n" <<
 				 "  -o <file>              Place the output into <file>.\n" <<
