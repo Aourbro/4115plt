@@ -3,13 +3,15 @@
 
 #include <iostream>
 #include <memory>
+#include <algorithm>
 #include "basic_exp.h"
 
 class BaseAST {
 public:
+    static BasicExp resultExp;
     virtual ~BaseAST() = default;
     virtual void Dump(std::string indent) const = 0;
-    virtual BasicExp calc() const = 0;    // TODO: implement this method on every ast nodes
+    virtual void calc() const = 0;    // TODO: implement this method on every ast nodes
 };
 
 class ExprAST : public BaseAST{
@@ -23,10 +25,9 @@ public:
         exprs->Dump(indent + "  ");
     }
 
-    BasicExp calc() const override{
-        BasicExp res;
-        //TODO
-        return res;
+    void calc() const override{
+        term->calc();
+        exprs->calc();
     }
 };
 
@@ -50,10 +51,18 @@ public:
         exprs->Dump(indent + "  ");
     }
 
-    BasicExp calc() const override{
-        BasicExp res;
-        //TODO
-        return res;
+    void calc() const override{
+        if (type == -1) {
+            return;
+        }
+        BasicExp tmp = resultExp;
+        term->calc();
+        if (type == 0) {
+            resultExp = tmp + resultExp;
+        } else {
+            resultExp = tmp - resultExp;
+        }
+        exprs->calc();
     }
 };
 
@@ -68,10 +77,9 @@ public:
         terms->Dump(indent + "  ");
     }
 
-    BasicExp calc() const override{
-        BasicExp res;
-        //TODO
-        return res;
+    void calc() const override{
+        uExpr->calc();
+        terms->calc();
     }
 };
 
@@ -95,10 +103,18 @@ public:
         terms->Dump(indent + "  ");
     }
 
-    BasicExp calc() const override{
-        BasicExp res;
-        //TODO
-        return res;
+    void calc() const override{
+        if (type == -1) {
+            return;
+        }
+        BasicExp tmp = resultExp;
+        uExpr->calc();
+        if (type == 0) {
+            resultExp = tmp * resultExp;
+        } else {
+            resultExp = tmp / resultExp;
+        }
+        terms->calc();
     }
 };
 
@@ -117,10 +133,11 @@ public:
         fact->Dump(indent + "  ");
     }
 
-    BasicExp calc() const override{
-        BasicExp res;
-        //TODO
-        return res;
+    void calc() const override{
+        fact->calc();
+        if (type == 1) {
+            resultExp = -resultExp;
+        }
     }
 };
 
@@ -147,10 +164,15 @@ public:
         }
     }
 
-    BasicExp calc() const override{
-        BasicExp res;
-        //TODO
-        return res;
+    void calc() const override{
+        if (type == 0) {
+            expr->calc();
+        } else if (type == 1) {
+            num->calc();
+            symb0->calc();
+        } else {
+            symbs->calc();
+        }
     }
 };
 
@@ -169,14 +191,24 @@ public:
         }
     }
 
-    BasicExp calc() const override{
-        BasicExp res;
-        //TODO
-        return res;
+    void calc() const override{
+        if (type == 0) {
+            frac->calc();
+        } else {
+            std::vector<BasicTerm>().swap(resultExp.numer);
+            resultExp.numer.push_back(BasicTerm(Rational(number, 1), 0));
+        }
     }
 };
 
 class SymbsAST : public BaseAST{
+private:
+    const std::vector<std::string> _symbolPool {
+        "\\alpha", "\\beta", "\\gamma", "\\delta", "\\epsilon", "\\zeta", "\\eta", "\\theta", "\\lota", "\\kappa",
+        "\\lambda", "\\mu", "\\nu", "\\xi", "\\omicron", "\\pi", "\\rho", "\\sigma", "\\tau", "\\upsilon", "\\phi",
+        "\\chi", "\\psi", "\\omega",
+    };  // 24
+
 public:
     std::string symbol;
     std::unique_ptr<BaseAST> symb0;
@@ -187,10 +219,17 @@ public:
         symb0->Dump(indent + "  ");
     }
 
-    BasicExp calc() const override{
-        BasicExp res;
-        //TODO
-        return res;
+    void calc() const override{
+        uint64_t symbolBit;
+        if (symbol.length() == 1) {
+            symbolBit = 1ULL << (symbol[0] - 'a');
+        } else {
+            std::vector<std::string>::const_iterator it = find(_symbolPool.begin(), _symbolPool.end(), symbol);
+            symbolBit = 1ULL << (26 + it - _symbolPool.begin());
+        }
+        std::vector<BasicTerm>().swap(resultExp.numer);
+        resultExp.numer.push_back(BasicTerm(Rational(1, 1), symbolBit));
+        symb0->calc();
     }
 };
 
@@ -207,10 +246,13 @@ public:
         symbs->Dump(indent + "  ");
     }
 
-    BasicExp calc() const override{
-        BasicExp res;
-        //TODO
-        return res;
+    void calc() const override{
+        if (type == -1) {
+            return;
+        }
+        BasicExp tmp = resultExp;
+        symbs->calc();
+        resultExp = tmp * resultExp;
     }
 };
 
@@ -230,10 +272,11 @@ public:
         std::cout << indent + "  }" << std::endl;
     }
 
-    BasicExp calc() const override{
-        BasicExp res;
-        //TODO
-        return res;
+    void calc() const override{
+        expr_numer->calc();
+        BasicExp tmp = resultExp;
+        expr_denom->calc();
+        resultExp = tmp / resultExp;
     }
 };
 

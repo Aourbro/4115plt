@@ -63,6 +63,10 @@ int main(int argc, char **argv)
 	} else {
 		goto HELP;
 	}
+
+	ast->calc();
+	BaseAST::resultExp.CodeGen();
+	std::cout << std::endl;
 	return 0;
 
 HELP:

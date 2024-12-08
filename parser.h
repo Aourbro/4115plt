@@ -20,9 +20,9 @@
  * 
  * Parsing table:
  *         Symbol        Number        "+" | "-"                "*" | "/"                 "\frac"                             "}"   "("            ")"   $
- * Expr  | Term Exprs  | Term Exprs  |                        |                         | Term Exprs                        |     | Term Exprs   |     |   |
+ * Expr  | Term Exprs  | Term Exprs  | Term Exprs             |                         | Term Exprs                        |     | Term Exprs   |     |   |
  * Exprs |             |             | ("+" | "-") Term Exprs |                         |                                   |  e  |              |  e  | e |
- * Term  | UExpr Terms | UExpr Terms |                        |                         | UExpr Terms                       |     | UExpr Terms  |     |   |
+ * Term  | UExpr Terms | UExpr Terms | UExpr Terms            |                         | UExpr Terms                       |     | UExpr Terms  |     |   |
  * Terms |             |             | e                      | ("*" | "/") UExpr Terms |                                   |  e  |              |  e  | e |
  * UExpr | Fact        | Fact        | ("+" | "-") Fact       |                         | Fact                              |     | Fact         |     |   |
  * Fact  | Symbs       | Num Symb0   |                        |                         | Num Symb0                         |     | "(" Expr ")" |     |   |

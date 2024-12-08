@@ -74,7 +74,7 @@ private:
         {PAIR(State::Init, CharacterType::Bracket), PAIR(State::Init, Action::PushThis)},
 
         {PAIR(State::Number, CharacterType::Digit), PAIR(State::Number, Action::AddToken)},
-        {PAIR(State::Number, CharacterType::Letter), PAIR(State::Letter, Action::PushToken)},
+        {PAIR(State::Number, CharacterType::Letter), PAIR(State::Letter, Action::PushTokenAndThis)},
         {PAIR(State::Number, CharacterType::EscapeChar), PAIR(State::Escape, Action::PushToken)},
         {PAIR(State::Number, CharacterType::WhiteSpace), PAIR(State::Init, Action::PushToken)},
         {PAIR(State::Number, CharacterType::Operator), PAIR(State::Init, Action::PushTokenAndThis)},

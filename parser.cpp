@@ -1,6 +1,8 @@
 #include "parser.h"
 #include "error.h"
 
+BasicExp BaseAST::resultExp = BasicExp();
+
 std::unique_ptr<BaseAST> Parser::parse(std::vector<std::pair<TokenClass, std::string> > stream)
 {
     this->_stream = stream;
@@ -18,6 +20,18 @@ std::unique_ptr<ExprAST> Parser::parseExpr()
         expr->term = parseTerm();
         expr->exprs = parseExprs();
         return expr;
+    case TokenClass::Operator:
+        if (_stream[_pos].second == "+") {
+            expr->term = parseTerm();
+            expr->exprs = parseExprs();
+            return expr;
+        } else if (_stream[_pos].second == "-") {
+            expr->term = parseTerm();
+            expr->exprs = parseExprs();
+            return expr;
+        } else {
+            [[fallthrough]];
+        }
     default:
         printf("Unexpected token \"%s\" at token %d\n", _stream[_pos].second.c_str(), _pos);
         _pos++;
@@ -70,6 +84,18 @@ std::unique_ptr<TermAST> Parser::parseTerm()
         term->uExpr = parseUExpr();
         term->terms = parseTerms();
         return term;
+    case TokenClass::Operator:
+        if (_stream[_pos].second == "+") {
+            term->uExpr = parseUExpr();
+            term->terms = parseTerms();
+            return term;
+        } else if (_stream[_pos].second == "-") {
+            term->uExpr = parseUExpr();
+            term->terms = parseTerms();
+            return term;
+        } else {
+            [[fallthrough]];
+        }
     default:
         printf("Unexpected token \"%s\" at token %d\n", _stream[_pos].second.c_str(), _pos);
         _pos++;
