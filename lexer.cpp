@@ -121,9 +121,9 @@ inline void Lexer::pushThis(char c)
 void Lexer::printTokens()
 {
     int size = _tokenStream.size();
-    printf("total %d tokens:\n", size);
+    printf("%% total %d tokens:\n", size);
 
     for (int i = 0; i < size; ++i) {
-        printf("  <%s, %s>\n", token2String(_tokenStream[i].first).c_str(), _tokenStream[i].second.c_str());
+        printf("%%  <%s, %s>\n", token2String(_tokenStream[i].first).c_str(), _tokenStream[i].second.c_str());
     }
 }

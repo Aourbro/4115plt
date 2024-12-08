@@ -6,6 +6,7 @@
 int main(int argc, char **argv)
 {
 	int ret = -1;
+	bool debug = false;
 
 	Lexer lexer;
 	Parser parser;
@@ -22,6 +23,9 @@ int main(int argc, char **argv)
 	for (int i = 1; i < argc; ) {
 		if (std::string(argv[i]).compare("--help") == 0) {
 			goto HELP;
+		}
+		if (std::string(argv[i]).compare("--debug") == 0) {
+			debug = true;
 		}
 		if (std::string(argv[i]).compare("-s") == 0) {
 			++i;
@@ -53,29 +57,37 @@ int main(int argc, char **argv)
 		goto HELP;
 	}
 	
-	lexer.printTokens();
+	if (debug) {
+		lexer.printTokens();
+	}
 	tokenStream = lexer.getStream();
 	tokenStream.push_back(std::make_pair(TokenClass::EOS, "$"));
 
 	ast = parser.parse(tokenStream);
 	if (parser.getSuccess()) {
-		ast->Dump("");
+		if (debug) {
+			ast->Dump("% ");
+		}
 	} else {
 		goto HELP;
 	}
 
 	ast->calc();
+	BaseAST::resultExp.ExpSort();
+	std::cout << "$ ";
 	BaseAST::resultExp.CodeGen();
-	std::cout << std::endl;
+	std::cout << " $" << std::endl;
 	return 0;
 
 HELP:
 	std::cout << "Usage: ./main [options]\n" <<
 		   		 "Options:\n" <<
 				 "  --help                 Display this information.\n" <<
+				 "  --debug				   Display token and ast information\n" <<
 			 	 "  -s <string>            Take the <string> as input LaTeX expression.\n" <<
 				 "  -f <file>              Take content in the <file> as input.\n" <<
 				 "  -o <file>              Place the output into <file>.\n" <<
-				 "Option -f has higher priority than -s\n";
+				 "Option -f has higher priority than -s\n" <<
+				 "Append '> <file>' after all option to redirect the output into a file\n";
 	return 0;
 }

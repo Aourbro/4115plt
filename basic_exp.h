@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <vector>
 #include <iostream>
+#include <algorithm>
 
 class Rational {
 public:
@@ -99,6 +100,12 @@ public:
             }
             numer[i].CodeGen();
         }
+    }
+
+    void ExpSort() {
+        sort(numer.begin(), numer.end(), [](const BasicTerm termA, const BasicTerm termB){
+            return termA.symbolTable < termB.symbolTable;
+        });
     }
 };
 
