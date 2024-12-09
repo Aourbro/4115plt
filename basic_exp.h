@@ -19,6 +19,10 @@ public:
     friend Rational operator/(const Rational& ratA, const Rational& ratB);
 
     void CodeGen() {
+        if (denom < 0) {
+            denom *= -1;
+            numer *= -1;
+        }
         if (numer < 0) { // if the numerator is negative
             std::cout << "-";
         }
