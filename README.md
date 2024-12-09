@@ -295,6 +295,16 @@ ExprAST
 
 ## Programming assignment 3
 
+### **1. Calculation Process**
+- The calculator is implemented by a recursive method on AST nodes.
+- A global value is used to store the value of the calculation result of the current AST node.
+- After calculation, the raw result expression is stored in that global value.
+
+### **2. Code Generation**
+- The terms of the expression is sorted by alphabetic order of the symbol part of each term.
+- The code generator is implemented by a method in class BasicExp.
+- The code generator prints the expression in a more readable way than its raw format.
+
 ### Final output of test0
 ```
 $ \frac{1}{10}a\alpha+\beta $
